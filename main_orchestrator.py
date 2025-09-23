@@ -48,7 +48,7 @@ def main():
     for script in scripts_to_run:
         run_script(script)
     
-    print("All scripts finished successfully! 🎉")
+    print("All scripts finished successfully!")
 
 if __name__ == "__main__":
     main()
