@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define variables for clarity
-PROJECT_DIR="~/bp_etl/bp-datawarehouse-OrdersFACT"
+PROJECT_DIR="/home/peter_gs/bp_etl/bp-datawarehouse-OrdersFACT"
 LOG_FILE="/tmp/etl_run_log_$(date +'%Y%m%d_%H%M%S').txt"
 GCS_BUCKET="gs://cs-royalties-test"
 GCS_DESTINATION_PATH="/run_logs/"
