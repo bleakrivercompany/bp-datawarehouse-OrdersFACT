@@ -10,7 +10,7 @@ GCS_DESTINATION_PATH="/run_logs/"
 cd "$PROJECT_DIR"
 
 # Activate the virtual environment
-source bp_etl/bin/activate
+source ../bp_etl/bin/activate
 
 # Execute the main Python script and redirect ALL output (stdout and stderr) to a log file
 python3 main_orchestrator.py > "$LOG_FILE" 2>&1
