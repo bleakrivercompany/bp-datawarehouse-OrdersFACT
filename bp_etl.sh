@@ -4,7 +4,7 @@
 PROJECT_DIR="/home/peter_gs/bp_etl/bp-datawarehouse-OrdersFACT"
 LOG_FILE="/tmp/etl_run_log_$(date +'%Y%m%d_%H%M%S').txt"
 GCS_BUCKET="gs://cs-royalties-test"
-GCS_DESTINATION_PATH="/run_logs/"
+GCS_DESTINATION_PATH="run_logs/"
 
 # Navigate to your project directory
 cd "$PROJECT_DIR"
