@@ -112,8 +112,7 @@ words_to_replace = r'\s+\b(the|and)\b\s+|\s*\|\s*'
 
 # [():] matches any single character in the set
 # The other words are matched directly
-chars_and_phrases_to_remove = r'[():]|pre-order|pre order|paperback|hardcover'
-
+chars_and_phrases_to_remove = r"[():]|pre-order|pre order|paperback|hardcover|'"
 # --- MasterTitleL chained cleaning operation ---
 booksf['MasterTitleL'] = (
     booksf['MasterTitle']

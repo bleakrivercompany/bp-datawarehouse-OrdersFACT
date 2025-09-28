@@ -842,7 +842,7 @@ save_to_bq(fr1, f"{project_id}.{fact_database}.{royalty_fact_table}", bq_client)
 # FR2 : FACT Royalty Summary
 rpt_database = f"reporting_tables"
 royalty_fact_table = f"Royalty_Summary_Report_Complete"
-save_to_bq(fr2, f"{project_id}.{fact_database}.{royalty_fact_table}", bq_client)
+save_to_bq(fr2, f"{project_id}.{rpt_database}.{royalty_fact_table}", bq_client)
 # FR5 : Royalty Sales
 rpt_database = f"reporting_tables"
 royalty_fact_table = f"Royalties_Sales_Report_Complete"

@@ -163,8 +163,10 @@ wc_book['Title'] = (
     .str.replace('(E-book)', '', regex=False)
     .str.replace(' <BR>&nbsp;<BR>', '', regex=False)
     .str.replace('#038; ', '', regex=False)
-    .str.replace("'", "", regex=False)
-)
+    .str.replace('&#x2122;','', regex=False)
+    .str.replace("'", '', regex=False)
+    .str.replace('â„¢','', regex=False)
+).copy()
 
 # 5. Final cleaned dataframe
 wc_clean = (
