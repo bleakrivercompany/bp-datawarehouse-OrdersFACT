@@ -116,10 +116,45 @@ def clean_text_column(text_series: pd.Series) -> pd.Series:
     cleaned_series = (
         text_series.astype(str)
         .str.strip()
+        .str.replace(r'[^a-zA-Z0-9\s]', ' ', regex=True)
         .str.replace(u'\u201c', '', regex=False)      # Left double quote
         .str.replace(u'\u201d', '', regex=False)      # Right double quote
         .str.replace('&ndash; ', '', regex=False)     # en dash
         .str.replace(' <BR>&nbsp;<BR>', '', regex=False) # HTML line breaks
         .str.replace('#038; ', '', regex=False)      # HTML ampersand entity
+        .str.replace(r'\s+', ' ', regex=True)
+        .str.strip()
     )
     return cleaned_series
+
+def clean_hidden_chars(df):
+    """
+    Cleans hidden characters and normalizes whitespace in all object columns
+    of a DataFrame intended to be treated as strings.
+    """
+    # Define common hidden/non-standard characters to replace
+    # \xa0 is non-breaking space (common web artifact)
+    # \x00 is the null byte (common database/file issue)
+    hidden_chars_pattern = r'[\r\n\t\xa0\x00]'
+    
+    # 1. Identify all 'object' columns
+    object_cols = df.select_dtypes(include=['object']).columns
+
+    for col in object_cols:
+        # Step 1: Replace non-visible characters with a single space
+        # We replace with a space to prevent merging words together
+        df[col] = df[col].astype(str).str.replace(
+            hidden_chars_pattern, ' ', regex=True
+        )
+        
+        # Step 2: Replace multiple spaces (including newlines/tabs converted to spaces) 
+        # with a single space and remove leading/trailing whitespace.
+        df[col] = df[col].str.replace(r'\s+', ' ', regex=True).str.strip()
+        
+        # Step 3: Handle empty strings created by cleaning (convert to NaN)
+        df[col] = df[col].replace('', np.nan)
+
+    return df
+
+# Example Usage:
+# DFC = clean_hidden_chars(DFC)

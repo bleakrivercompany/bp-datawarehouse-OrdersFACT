@@ -112,11 +112,14 @@ words_to_replace = r'\s+\b(the|and)\b\s+|\s*\|\s*'
 
 # [():] matches any single character in the set
 # The other words are matched directly
-chars_and_phrases_to_remove = r"[():]|pre-order|pre order|paperback|hardcover|'"
+chars_and_phrases_to_remove = r"[():]|pre-order|pre order|paperback|hardcover|├│n|ΓÇ£|ΓÇ¥|out of print|digital only|[//:]|Γäó"
 # --- MasterTitleL chained cleaning operation ---
 booksf['MasterTitleL'] = (
     booksf['MasterTitle']
     .str.lower()
+    #.str.replace(r'[^a-zA-Z0-9\s]', ' ', regex=True)
+    .str.replace('digital only // out of print', '', regex=True)
+    .str.replace("i'll fly away", "ill fly away", regex=True)
     .str.replace(words_to_replace, ' ', regex=True)        # Replace ' the ', ' and ', '|' with a space
     .str.replace(chars_and_phrases_to_remove, '', regex=True) # Remove all other unwanted text
     .str.replace(r'\s+', ' ', regex=True)                  # Collapse multiple spaces into one
@@ -127,6 +130,9 @@ booksf['MasterTitleL'] = (
 booksf['TestTitleL'] = (
     booksf['TestTitle']
     .str.lower()
+    #.str.replace(r'[^a-zA-Z0-9\s]', ' ', regex=True)
+    .str.replace('digital only // out of print', '', regex=True)
+    .str.replace("i'll fly away", "ill fly away", regex=True)
     .str.replace(words_to_replace, ' ', regex=True)        # Replace ' the ', ' and ', '|' with a space
     .str.replace(chars_and_phrases_to_remove, '', regex=True) # Remove all other unwanted text
     .str.replace(r'\s+', ' ', regex=True)                  # Collapse multiple spaces into one
@@ -138,7 +144,9 @@ booksf['TestTitleL'] = (
 replacements = {
     'future limited edition': 'future limited edition hilborn',
     'helium limited edition': 'helium limited edition francisco',
-    'madness vase': 'madness vase gibson'
+    'madness vase': 'madness vase gibson',
+    "i'll fly away": 'ill fly away francisco',
+    "ill fly away": 'ill fly away francisco',
 }
 
 # Use pd.Series.replace() with the dictionary
@@ -304,7 +312,7 @@ Bundle_Dim = (
 Bundle_Dim['Revenue_Share_Book'] = Bundle_Dim['Revenue_Share_Book'].astype(float)
 Bundle_Dim['Revenue_Share_NonBook'] = Bundle_Dim['Revenue_Share_NonBook'].astype(float)
 Bundle_Dim['Bundle_ID'] = [str(x).replace('.0','') for x in Bundle_Dim['Bundle_ID'] ]
-Bundle_Dim['Bundle_ID']
+
 #Bundle_Dim['Revenue_Share_Book'] = Bundle_Dim['Revenue_Share_Book'].astype(float)
 #Bundle_Dim['Revenue_Share_NonBook'] = Bundle_Dim['Revenue_Share_NonBook'].astype(float)
 # List the columns you want to apply the logic to

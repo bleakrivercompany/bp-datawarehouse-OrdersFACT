@@ -286,6 +286,14 @@ else:
     
 DFC = DFC[DFC['ItemID'].notna()]
 
+# Convert empty strings in both columns to NaN for reliable checking
+# For ItemCompParent
+DFC['ItemCompParent'] = DFC['ItemCompParent'].replace('', np.nan).astype(object)
+# For ItemBundleCode
+DFC['ItemBundleCode'] = DFC['ItemBundleCode'].replace('', np.nan).astype(object)
+# For ItemBundleTitle
+DFC['ItemBundleTitle'] = DFC['ItemBundleTitle'].replace('', np.nan).astype(object)
+
 """ 
 BLOCK 2 pt2: CLEAN UP AND CATEGORIZE
 """
@@ -293,10 +301,31 @@ BLOCK 2 pt2: CLEAN UP AND CATEGORIZE
 DFC.loc[(DFC['ItemMetaKey'] == 'Gift Wrapped') | (DFC['ItemBundleByAlt'] == '_gift_wrap'), 'Giftwrapped'] = 'Yes'
 # Two columns may have Wholesaler info
 DFC.loc[(DFC['ItemMetaKey'] == '_wwp_wholesale_role') | (DFC['ItemBundleByAlt'] == '_wwp_wholesale_prices') | (DFC['ItemBundleByAlt'] == '_wwp_wholesale_role'), 'Wholesale'] = 'Yes'
-# Bundle identifier
-DFC.loc[ (DFC['ItemName'].str.contains(r'Bundle') | (DFC['ItemName'].str.contains(r'Combo')) | (DFC['ItemBundleCode'].notnull()) | (DFC['ItemCompParent'].notnull()), 'BundleID' ) ] = DFC['ItemID']
-DFC.loc[ (DFC['ItemBundleCode'].notnull()), 'BundledBy'] = DFC['ItemBundleCode']
-DFC.loc[ (DFC['ItemCompParent'].notnull()), 'BundledBy'] = DFC['ItemCompParent']
+# 1. Define the BundleID using OR logic (This part is fine)
+# Note: Ensure you are using .str.contains() with case sensitivity you intend (default is case sensitive)
+DFC.loc[
+    (DFC['ItemName'].str.contains(r'Bundle', case=False) | 
+     DFC['ItemName'].str.contains(r'Combo', case=False) | 
+     (DFC['ItemBundleCode'].notnull()) | 
+     (DFC['ItemCompParent'].notnull())), 
+    'BundleID' 
+] = DFC['ItemID']
+
+# 2. Define the BundledBy column using np.where for precedence
+# This sets BundledBy based on a single, non-overwriting conditional statement:
+# IF ItemCompParent is not null, use it. 
+# ELSE IF ItemBundleCode is not null, use it.
+# ELSE, use NaN.
+
+DFC['BundledBy'] = np.where(
+    DFC['ItemCompParent'].notnull(), 
+    DFC['ItemCompParent'], 
+    np.where(
+        DFC['ItemBundleCode'].notnull(),
+        DFC['ItemBundleCode'],
+        np.nan # Use Pandas' default null value
+    )
+)
 # Clean Item Names
 DFC['ItemName'] = clean_text_column(DFC['ItemName'])
 # Dates
@@ -417,6 +446,10 @@ DFC['TaxTotal'] = DFC['TaxTotal'].replace('',0).astype(float)
 """ 
 BLOCK 4: THE BIG MERGE
 """
+DFC['BundleID'] = [str(x).replace('.0','') for x in DFC['BundleID'] ]
+DFC['BundledBy'] = [str(x).replace('.0','') for x in DFC['BundledBy'] ]
+DFC['ItemID'] = [str(x).replace('.0','') for x in DFC['ItemID'] ]
+
 pd_merge_order_coup = pd.merge(DFC, CPDB, on=['OrderID', 'ItemOrderSeq'],how='left')
 pd_merge_order = pd.merge(pd_merge_order_coup, RFDB, on= ['OrderID', 'ItemOrderSeq'], how='left')
 pd_merge_order['ItemOrderSeq'] = pd_merge_order['ItemOrderSeq'].astype(int)

@@ -13,6 +13,9 @@ from gcp_getsecrets import get_gcp_secret
 from gcp_postbucket import save_bucket
 from gcp_getbucket import get_bucket_csv
 from gcp_savebigquery import save_to_bq
+
+#ARCHIVE PATH
+#archive_path = r'D:\BleakRiverDataServ\Clients\Button\RoyaltyCheck'
 """ 
 GCP PARAMETERS
 """
@@ -278,6 +281,7 @@ WOOCOM SALES
 wcall['Bundle ID'] = [str(x).replace('.0','') for x in wcall['Bundle ID'] ]
 wcall['Bundled By'] = [str(x).replace('.0','') for x in wcall['Bundled By'] ]
 # fill null
+wcall['Bundle ID'] = wcall['Bundle ID'].fillna('Not Bundled')
 wcall['Bundled By'] = wcall['Bundled By'].fillna('Not Bundled')
 # nan values
 wcall['Bundle ID'] = wcall['Bundle ID'].replace({'nan':'Not Bundled'})
@@ -287,6 +291,8 @@ wcall['JoinDate'] = pd.to_datetime(wcall['Order Date']).dt.date
 dd['JoinDate'] = pd.to_datetime(dd['date']).dt.date
 
 wc1 = pd.merge(wcall, dd, left_on=['JoinDate'], right_on=['JoinDate'], how='left').reset_index(drop=True)
+
+#wc1.to_csv(archive_path + r"\wc1.csv")
 
 # Select Columns and Reorder
 wc2 = wc1[['Order Number', 
@@ -325,9 +331,15 @@ wc2 = wc1[['Order Number',
            'SCB_Sales_Qtr', 
            'SCB_Return_Qtr']].reset_index(drop=True)
 
+#wc2.to_csv(archive_path + r"\wc2.csv")
+
 wc3 = pd.merge(wc2, subbook, left_on=['Product Name'], right_on=['Source_Title'], how='left').drop_duplicates().reset_index(drop=True)
 
+#wc3.to_csv(archive_path + r"\wc3.csv")
+
 wc4 = pd.merge(wc3, bundle, left_on='Bundled By', right_on='Bundle_ID', how='left').drop_duplicates().reset_index(drop=True)
+
+#wc4.to_csv(archive_path + r"\wc4_init.csv")
 
 wc4['Bundled By'] = wc4['Bundled By'].fillna('Not Bundled')
 
@@ -337,10 +349,11 @@ conditions = [
 choices = ['Bundled Book']
 wc4['Category_Merge'] = np.select(conditions, choices, default = wc4['Category'])
 
+#wc4.to_csv(archive_path + r"\wc4_fin.csv")
 # Merch
 #merch = merch.drop_duplicates(subset='Product_Name')
 wc5 = pd.merge(wc4, merch, left_on='Product Name', right_on='Product_Name', how='left').reset_index(drop=True)
-
+#wc5.to_csv(archive_path + r"\wc5_init.csv")
 wc5 = wc5.rename(columns=
            {'year' : 'Year', 
             'monthname' : 'Month', 
@@ -356,6 +369,7 @@ conditions = [
     ]
 choices = [wc5['True_Title']]
 wc5['True_Title_2'] = np.select(conditions, choices, default=wc5['Product Name'])
+#wc5.to_csv(archive_path + r"\wc5_mid.csv")
 
 # New Method for Assigning Revenue to Bundles
 # The Bundle_Dim now contains a revenue share per book ratio that can be multiplied by the books
@@ -370,7 +384,10 @@ bundle_of_join = bundle_of_join[['Bundle ID',
 # Create a small, unique DataFrame of bundle totals
 unique_bundles = bundle_of_join.drop_duplicates(subset=['Bundle ID'])
 
+#unique_bundles.to_csv(archive_path + r"\unique_bundles.csv")
+
 wc5 = pd.merge(wc5, unique_bundles, left_on='Bundled By', right_on='Bundle ID', how='left')
+#wc5.to_csv(archive_path + r"\wc5_postbundle.csv")
 
 # Order Line Total (net of discount, relevant to royalties)
 conditions = [
@@ -465,6 +482,8 @@ wc5 = wc5.fillna(value=wc5_fill_values)
 wc5['Book_Type'] = wc5['Book_Type'].fillna(wc5['Category'])
 wc5['ISBN_All'] = wc5['ISBN_All'].fillna(wc5['Category'])
 
+#wc5.to_csv(archive_path + r"\wc5_fin.csv")
+
 """ 
 WC5 is where FACT Order and FACT Royalty diverge
 
@@ -511,6 +530,8 @@ wc6 = wc5.groupby(
                      }).reset_index(drop=True)
 wc6 = wc6.sort_values(by=['Year', 'Month', 'True_Title'], ascending=[False, False, False]).reset_index(drop=True)
 wc6['Data_Source'] = 'WC'
+
+#wc6.to_csv(archive_path + r"\wc6.csv")
 
 #SCB SALES
 scb4['Bundle_Order_Line_Total'] = 0.0
@@ -626,6 +647,8 @@ wc7 = wc6[['Year', #1
            'Revenue_Wholesale_Order_Line_Total', #24
            'Revenue_Wholesale_Order_Line_Subtotal', #25
            'Data_Source']] #26
+
+#wc7.to_csv(archive_path + r"\wc7.csv")
 
 fr0 = pd.concat([scb_fin, wc7]).reset_index(drop=True)
 
