@@ -49,79 +49,29 @@ def get_unique_indices_from_columns(dataframe: pd.DataFrame, column_pattern: str
 
     return unique_sorted_indices
 
-# --- EXAMPLE USAGE ---
-# This demonstrates how to replace your original script's logic
 
-# Assume 'OrdersDF' is your DataFrame loaded from the previous step
-# OrdersDF = pd.read_csv('path_to_your_data.csv') # Example of loading data
-
-# Create a dummy DataFrame for demonstration if OrdersDF doesn't exist
-try:
-    OrdersDF
-except NameError:
-    print("Creating a dummy DataFrame for demonstration purposes.")
-    dummy_data = {
-        'id': [1, 2],
-        'line_items_0_name': ['Book', 'Mug'],
-        'line_items_0_price': [15, 10],
-        'line_items_1_name': ['Shirt', None],
-        'line_items_1_price': [20, None],
-        'coupon_lines_0_code': ['SALE10', None],
-        'refunds_0_amount': [None, 5.0]
-    }
-    OrdersDF = pd.DataFrame(dummy_data)
-    print("Dummy DataFrame created.")
-
-
-print("\n--- Using the new function ---")
-
-# Replace the repetitive blocks with clean function calls
-ref_array = get_unique_indices_from_columns(OrdersDF, 'refunds_')
-coup_array = get_unique_indices_from_columns(OrdersDF, 'coupon_lines_')
-item_indices = get_unique_indices_from_columns(OrdersDF, 'line_items_')
-
-print(f"Refund indices found: {ref_array}")
-print(f"Coupon indices found: {coup_array}")
-print(f"Line Item indices found: {item_indices}")
-
-# You can now easily get the maximum value for your item loop
-if item_indices.size > 0:
-    # .max() gets the highest index value. Your loop seems to iterate up to this number.
-    max_items_page = item_indices.max()
-else:
-    # If no items are found, set to -1 so your loop `while framecount < max_items_page` doesn't run
-    max_items_page = -1
-
-# The original script's `math.ceil` was redundant as the max index is already an integer.
-# The loop logic `framecount = -1; while framecount < max_items_page` is a bit unusual.
-# A more common Python pattern would be `for fcount in range(max_items_page + 1):`
-# However, this calculation matches your original script's behavior.
-print(f"\nCalculated 'max_items_page' for the loop: {max_items_page}")
 
 def clean_text_column(text_series: pd.Series) -> pd.Series:
     """
-    Cleans a Series of text data by stripping whitespace and removing
-    a predefined set of special characters and HTML remnants.
-
-    Args:
-        text_series (pd.Series): The pandas Series containing the text to be cleaned.
-
-    Returns:
-        pd.Series: The cleaned pandas Series.
+    Cleans a Series of text data but PRESERVES en dashes and hyphens.
     """
     if not isinstance(text_series, pd.Series):
         raise TypeError("Input must be a pandas Series.")
 
-    # Chain string operations for better performance and readability
+    # We modify the regex to include:
+    # \-   : Standard hyphen
+    # \u2013 : En dash
+    # \u2014 : Em dash (optional, but usually good to keep if keeping en dashes)
+    
     cleaned_series = (
         text_series.astype(str)
         .str.strip()
-        .str.replace(r'[^a-zA-Z0-9\s]', ' ', regex=True)
-        .str.replace(u'\u201c', '', regex=False)      # Left double quote
-        .str.replace(u'\u201d', '', regex=False)      # Right double quote
-        .str.replace('&ndash; ', '', regex=False)     # en dash
-        .str.replace(' <BR>&nbsp;<BR>', '', regex=False) # HTML line breaks
-        .str.replace('#038; ', '', regex=False)      # HTML ampersand entity
+        # FIX IS HERE: We added \-\u2013\u2014 to the exclusion list [^...]
+        #.str.replace(r'[^a-zA-Z0-9\s\-\u2013\u2014]', ' ', regex=True)
+        .str.replace(u'\u201c', '', regex=False)      
+        .str.replace(u'\u201d', '', regex=False)      
+        .str.replace(' <BR>&nbsp;<BR>', '', regex=False) 
+        .str.replace('#038; ', '', regex=False)      
         .str.replace(r'\s+', ' ', regex=True)
         .str.strip()
     )

@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 # FACT ROYALTY & FACT ORDER
 
+#from dotenv import load_dotenv
+#import os
+
+# override=True tells Python: "Ignore the system .bashrc, use my local .env file instead"
+#load_dotenv(override=True) 
+
+#print(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+
+
 import pandas as pd
 import numpy as np
 import json

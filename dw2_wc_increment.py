@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 # WOOCOM INCREMENTAL API CALL
+#from dotenv import load_dotenv
+#import os
+
+# override=True tells Python: "Ignore the system .bashrc, use my local .env file instead"
+#load_dotenv(override=True) 
+
+#print(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+
 import requests
 import pandas as pd
 import math
@@ -81,7 +89,7 @@ Products_Dim = Products_Run[['id', 'name', 'type', 'categories_0_id', 'categorie
 Products_Dim['name'] = Products_Dim['name'].astype(str).map(lambda x: x.strip())
 Products_Dim['name'] = Products_Dim['name'].astype(str).map(lambda x: x.replace(u'\u201c', ''))
 Products_Dim['name'] = Products_Dim['name'].astype(str).map(lambda x: x.replace(u'\u201d', ''))
-Products_Dim['name'] = Products_Dim['name'].astype(str).map(lambda x: x.replace(u'&ndash; ', ''))
+#Products_Dim['name'] = Products_Dim['name'].astype(str).map(lambda x: x.replace(u'&ndash; ', ''))
 Products_Dim['name'] = Products_Dim['name'].astype(str).map(lambda x: x.replace(u' <BR>&nbsp;<BR>', ''))
 Products_Dim['name'] = Products_Dim['name'].astype(str).map(lambda x: x.replace(u'#038; ', ''))
 

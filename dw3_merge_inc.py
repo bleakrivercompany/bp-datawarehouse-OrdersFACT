@@ -1,6 +1,15 @@
 # -*- coding: utf-8 -*-
 # MERGE INCREMENTS TO WC_ORDERS_COMPLETE AND SCB_COMPLETE
 
+#from dotenv import load_dotenv
+#import os
+
+# override=True tells Python: "Ignore the system .bashrc, use my local .env file instead"
+#load_dotenv(override=True) 
+
+#print(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+
+
 import pandas as pd
 from datetime import date
 from datetime import datetime
@@ -148,18 +157,21 @@ wc_book['TypeString'] = wc_book['TypeString'].fillna("Print")
 # 3. Use np.select() for efficient conditional assignment of 'BookType'
 conditions = [
     wc_book['TypeString'].str.contains('hardcover', case=False),
+    wc_book['Title'].str.contains('hardcover', case=False),
     wc_book['TypeString'].str.contains('audiobook', case=False),
-    wc_book['TypeString'].str.contains('e-?book', case=False) | wc_book['Title'].str.contains('e-?book', case=False, na=False),
+    wc_book['Title'].str.contains('audiobook', case=False),
+    wc_book['TypeString'].str.contains('e-book', case=False) | wc_book['Title'].str.contains('e-book', case=False, na=False),
+    wc_book['Title'].str.contains('e-', case=False, na=False),
     wc_book['TypeString'].str.contains('paperback|print', case=False, na=False)
 ]
-choices = ['Hardcover', 'Audiobook', 'E-Book', 'Print']
+choices = ['Hardcover', 'Hardcover', 'Audiobook', 'Audiobook', 'E-Book', 'E-Book', 'Print']
 
 wc_book['BookType'] = np.select(conditions, choices, default='Print')
 
 # 4. chained, vectorized .str.replace()
 wc_book['Title'] = (
     wc_book['Title']
-    .str.replace('&ndash; ', '', regex=False)
+    #.str.replace('&ndash; ', '', regex=False)
     .str.replace('(E-book)', '', regex=False)
     .str.replace(' <BR>&nbsp;<BR>', '', regex=False)
     .str.replace('#038; ', '', regex=False)
