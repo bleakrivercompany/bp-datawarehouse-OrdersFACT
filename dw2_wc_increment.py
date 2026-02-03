@@ -421,8 +421,8 @@ for ref in ref_array:
 if all_refunds:
     RFDB = pd.concat(all_refunds, ignore_index = True)
 else:
-    # If no items were processed, create an empty DataFrame with the correct columns.
-    RFDB = pd.DataFrame(columns=['OrderID']) # Add other columns as needed for an empty case
+    # If no refunds were processed, create an empty DataFrame with all expected columns.
+    RFDB = pd.DataFrame(columns=['OrderID', 'ItemOrderSeq', 'RefundID', 'RefundAmount', 'RefundTotal'])
 RFDB = RFDB.loc[RFDB['RefundID'].notna()]
 
 # Merge Joinkey Cleanups
